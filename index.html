@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <title>Basic Example</title>
+  <title>18F micro-purchase API</title>
   <style type="text/css">
     body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -357,6 +357,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 
 
   </style>
+    <script async src="http://localhost:35729/livereload.js"></script>
 </head>
 <body>
     <div class="progress">
@@ -364,34 +365,84 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
   </div>
 
   <div class="slide" id="slide-1">
-    <section class="slide-content"><h1 id="cleaver-101">Cleaver 101</h1>
-<h2 id="a-first-look-at-quick-html-presentations">A first look at quick HTML presentations</h2>
+    <section class="slide-content"><h1 id="micro-purchase-api">Micro-purchase API</h1>
+<h2 id="government-contracting-via-the-command-line">Government contracting via the command line</h2>
 </section>
   </div>
   <div class="slide hidden" id="slide-2">
-    <section class="slide-content"><h3 id="a-textual-example">A textual example</h3>
-<p>Content can be written in <strong>Markdown!</strong> New lines no longer need two angle brackets.</p>
-<p>This will be in a separate paragraph</p>
+    <section class="slide-content"><h3 id="what-is-a-micropurchase-">What is a micropurchase?</h3>
+<p>In the FAR, the government can use a credit card to procure nearly anything for $3,500 or less.</p>
+<p>This could be used for things like paper, pencils, and staplers.</p>
+<p>This had us wondering ...</p>
 </section>
   </div>
   <div class="slide hidden" id="slide-3">
-    <section class="slide-content"><h3 id="a-list-of-things">A list of things</h3>
-<ul>
-<li>Item 1</li>
-<li>Item B</li>
-<li>Item gamma</li>
-</ul>
-<p>No need for multiple templates!</p>
+    <section class="slide-content"><h3 id="-why-not-micropurchase-custom-software-">... Why not micropurchase custom software?</h3>
 </section>
   </div>
-  <div class="slide hidden author-slide" id="slide-4">
+  <div class="slide hidden" id="slide-4">
+    <section class="slide-content"><h3 id="first-iteration">First iteration</h3>
+<p>We used a Rube Goldberg contraption comprised of a Google Form and the GitHub API to accept bids.</p>
+<ul>
+<li><a href="https://github.com/18f/calc/issues/255">https://github.com/18f/calc/issues/255</a></li>
+<li><a href="https://docs.google.com/a/gsa.gov/forms/d/1eRFX0hSTTXMc2FulK6kPP2P02ZApQqlYZL7oVDghJJo/closedform">https://docs.google.com/a/gsa.gov/forms/d/1eRFX0hSTTXMc2FulK6kPP2P02ZApQqlYZL7oVDghJJo/closedform</a></li>
+</ul>
+<p>It sort of worked, and we ended with a bid for $1.</p>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-5">
+    <section class="slide-content"><h3 id="the-micro-purchase-platform">The micro-purchase platform</h3>
+<p>A web application for posting, bidding, and awarding very small government IT contracts.</p>
+<p>All you need is a DUNS number and a SAM.gov registration. (See <a href="https://micropurchase.18f.gov/faq">https://micropurchase.18f.gov/faq</a>)</p>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-6">
+    <section class="slide-content"><h3 id="behind-the-scenes">Behind the scenes</h3>
+<ul>
+<li><a href="https://micropurchase.18f.gov/">https://micropurchase.18f.gov/</a></li>
+<li>Standard Rails app</li>
+<li>Open Source (<a href="https://github.com/18f/micropurchase">https://github.com/18f/micropurchase</a>)</li>
+<li>Read and write API (yay!)</li>
+</ul>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-7">
+    <section class="slide-content"><h3 id="rails-architecture">Rails architecture</h3>
+<p>Rather than create separate controllers for API routes, we provide JSONic interfaces to the same routes accessible via the web UI.</p>
+<p>For example, if you&#39;re viewing <code>micropurchase.18f.gov/auctions</code> in the browser, you can also access that same route via API.</p>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-8">
+    <section class="slide-content"><h3 id="api-authentication">API Authentication</h3>
+<p>The app only uses GitHub OAuth. We don&#39;t store any passwords and we didn&#39;t want to start generating and storing API keys.</p>
+<p>Instead, we accept GitHub Personal API Tokens as the API keys (<a href="https://pages.18f.gov/micropurchase-api-docs/quickstart/">https://pages.18f.gov/micropurchase-api-docs/quickstart/</a>).</p>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-9">
+    <section class="slide-content"><h3 id="read-methods">Read methods</h3>
+<p><code>GET /auctions</code></p>
+<p><code>curl https://micropurchase.18f.gov/auctions -H &quot;Accept: text/x-json&quot; | jq &#39;.&#39;</code></p>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-10">
+    <section class="slide-content"><h3 id="write-methods">Write methods</h3>
+<p><code>POST /auctions/:id/bids/</code></p>
+<pre><code class="lang-bash">curl -i \
+  -H <span class="hljs-string">"Accept: text/x-json"</span> \
+  -H <span class="hljs-string">"Api-Key: <span class="hljs-variable">$MICROPURCHASE_API_KEY</span>"</span> \
+  -H <span class="hljs-string">"Content-Type: application/json"</span> \
+  -X POST <span class="hljs-_">-d</span> <span class="hljs-string">'{"bid": {"amount": 150}}'</span> \
+  https://micropurchase-staging.18f.gov/auctions/1/bids</code></pre>
+</section>
+  </div>
+  <div class="slide hidden author-slide" id="slide-11">
     <section class="slide-content"><div class="author">
-  <h1 class="name">Jordan Scales</h1>
+  <h1 class="name">Alan deLevie &amp; Alla Goldman Seiffert</h1>
     <h3 class="twitter">
-      <a href="http://twitter.com/@jdan">@jdan</a>
+      <a href="http://twitter.com/@adelevie @allagoldman">@adelevie @allagoldman</a>
     </h3>
     <h3 class="url">
-      <a href="http://jordanscales.com">http://jordanscales.com</a>
+      <a href="https://18f.gsa.gov">https://18f.gsa.gov</a>
     </h3>
 </div>
 </section>
